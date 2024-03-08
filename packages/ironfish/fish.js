@@ -1,11 +1,7 @@
 import relaycircuit from "../circuits/relay_circuit/target/relay_circuit.json" assert { type: "json" };
-import usercircuit from "../circuits/user_circuit/target/user_circuit.json" assert { type: "json" };
 import { CurrencyUtils, IronfishSdk } from "@ironfish/sdk";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
-// import { InputMap } from "@noir-lang/noirc_abi";
-// import { CompiledCircuit } from "@noir-lang/types";
-// import async from 'async';
 import pkg from 'js-sha256';
 const { Message, sha256 } = pkg;
 
@@ -120,7 +116,7 @@ async function transactionProofs(
       fee: fee,
       feePriceIRON: feePriceIron,
       hash_path: [hashPath],
-      spend_limit: spendLimit,
+      spend_limit: spendLimit * 10000,
       transferAmount: transferAmount,
       transactionHash: `0x${content?.hash?content.hash:"0000000000000000000000000000000000000000000000000000000000000000"}`,
       root: root.digest(),
@@ -149,6 +145,4 @@ function numToUint8Array(num) {
   return arr;
 }
 
-// main()
-// async.series([transactionView]);
 export { createRawTransaction, transactionProofs };

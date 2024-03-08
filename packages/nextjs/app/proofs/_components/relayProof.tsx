@@ -4,13 +4,42 @@ import { useCallback, useEffect, useState } from "react";
 import { transactionProofs } from "../proofGenerator/ironfish";
 import { ProofData } from "./proofData";
 import { Identity } from "@semaphore-protocol/identity";
+import { useWalletClient } from "wagmi";
 import { InputBase } from "~~/components/scaffold-eth";
 import { AddressInput } from "~~/components/scaffold-eth";
+import { useScaffoldContract } from "~~/hooks/scaffold-eth";
 
 const chainNames = ["Arbitrum", "Scroll"];
 const chainAssets = {
-  [chainNames[0]]: ["ETH", "USDC", "USDT", "DAI", "ARB"],
-  [chainNames[1]]: ["ETH", "USDC"],
+  [chainNames[0]]: ["ETH", "USDC", "LINK"],
+  [chainNames[1]]: ["ETH", "LINK"],
+};
+const chainAssetDetails = {
+  [chainNames[0] + " | " + chainAssets[chainNames[0]][0]]: {
+    symbol: "ETH",
+    address: "0x0000000000000000000000000000000000000000",
+    type: "1",
+  },
+  [chainNames[0] + " | " + chainAssets[chainNames[0]][1]]: {
+    symbol: "USDC",
+    address: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d",
+    type: "2",
+  },
+  [chainNames[0] + " | " + chainAssets[chainNames[0]][2]]: {
+    symbol: "LINK",
+    address: "0xb1D4538B4571d411F07960EF2838Ce337FE1E80E",
+    type: "2",
+  },
+  [chainNames[1] + " | " + chainAssets[chainNames[1]][0]]: {
+    symbol: "ETH",
+    address: "0x0000000000000000000000000000000000000000",
+    type: "1",
+  },
+  [chainNames[1] + " | " + chainAssets[chainNames[1]][1]]: {
+    symbol: "LINK",
+    address: "0x7273ebbB21F8D8AcF2bC12E71a08937712E9E40c",
+    type: "2",
+  },
 };
 
 export const RelayProof = () => {
@@ -29,6 +58,12 @@ export const RelayProof = () => {
   const [ipfsHash, setIpfsHash] = useState<string>();
   const [generating, setGenerating] = useState(false);
   const [isProofErrored, setIsProofErrored] = useState(false);
+
+  const walletClient = useWalletClient();
+  const contractData = useScaffoldContract({
+    contractName: "YourContract",
+    walletClient: walletClient.data,
+  });
 
   useEffect(() => {
     const identityString = localStorage.getItem("identity");
@@ -57,13 +92,44 @@ export const RelayProof = () => {
   }, []);
 
   const generateProof = useCallback(async () => {
-    setGenerating(true);
-    const assetAddress = "0x4c58A838E6FccE71237FB07ab078B49474086496";
-    const assetPriceIRON = "1";
-    const assetType = "2";
-    const fee = "1";
-    const feePriceIRON = "1";
     try {
+      setGenerating(true);
+
+      const cmcResp = await fetch(
+        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=IRON,ETH,${
+          chainAssetDetails[selectedChain + " | " + selectedAsset].symbol
+        }`,
+        {
+          method: "GET",
+          headers: {
+            "X-CMC_PRO_API_KEY": String(process.env.NEXT_PUBLIC_CMC_API_KEY),
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const cmcData = await cmcResp.json();
+
+      const estimatedFees = await contractData.data?.estimateGas.withdraw();
+
+      const assetAddress = `${chainAssetDetails[selectedChain + " | " + selectedAsset].address}`;
+      const assetPriceIRON = `${parseInt(
+        String(
+          (cmcData.data[`${chainAssetDetails[selectedChain + " | " + selectedAsset].symbol}`].quote.USD.price /
+            cmcData.data.IRON.quote.USD.price) *
+            10000,
+        ),
+      )}`;
+      const assetType = `${chainAssetDetails[selectedChain + " | " + selectedAsset].type}`;
+      const estFee = `${Number(estimatedFees) / 10 ** 18}`;
+      const fee = `${Number(estFee) > 1 ? parseInt(estFee) : 1}`;
+      console.log(fee);
+      const feePriceIRON = `${
+        Number(estFee) > 1
+          ? parseInt(String((cmcData.data.ETH.quote.USD.price / cmcData.data.IRON.quote.USD.price) * 10000))
+          : 1
+      }`;
       const data = await transactionProofs(
         `0x${nullifier}`,
         `0x${trapdoor}`,
@@ -81,14 +147,38 @@ export const RelayProof = () => {
       setUserPublicInputs(JSON.stringify({ publicInputs: data.userTxProof.publicInputs }));
       setRelayProof(data.relayTxProof.proof);
       setRelayPublicInputs(JSON.stringify({ publicInputs: data.relayTxProof.publicInputs }));
-      setIpfsHash("dummy hash");
+
+      const ipfsRes = await fetch("http://localhost:3000/api", {
+        method: "POST",
+        body: JSON.stringify({
+          userProof: userProof,
+          userPublicInputs: userPublicInputs,
+          relayProof: relayProof,
+          relayPublicInputs: relayPublicInputs,
+        }),
+      });
+      const ipfsHash = await ipfsRes.text();
+
+      setIpfsHash(JSON.parse(ipfsHash).IpfsHash);
       setGenerating(false);
       setIsProofErrored(false);
     } catch (e) {
       setGenerating(false);
       setIsProofErrored(true);
     }
-  }, [assetAmount, commitment, nullifier, trapdoor]);
+  }, [
+    selectedChain,
+    selectedAsset,
+    contractData.data?.estimateGas,
+    nullifier,
+    trapdoor,
+    commitment,
+    assetAmount,
+    userProof,
+    userPublicInputs,
+    relayProof,
+    relayPublicInputs,
+  ]);
 
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
@@ -246,6 +336,7 @@ export const RelayProof = () => {
                     relayProof: relayProof,
                     relayPublicInputs: relayPublicInputs,
                     ipfsHash: ipfsHash,
+                    toAddress: toAddress,
                   }}
                 />
               ) : null}

@@ -94,7 +94,9 @@ export const Ironfund = () => {
               </div>
               <div className="flex justify-center gap-2 flex-wrap">OR</div>
               <div className="flex justify-between gap-2 flex-wrap">
-                <TxDetails txDetails={{ memo: commitment, amount: assetAmount, to: relayIronfishAddress }} />
+                <TxDetails
+                  txDetails={{ memo: commitment?.slice(0, 32), amount: assetAmount, to: relayIronfishAddress }}
+                />
               </div>
             </div>
           </div>

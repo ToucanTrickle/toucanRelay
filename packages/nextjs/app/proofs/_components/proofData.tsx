@@ -11,6 +11,7 @@ export const ProofData = ({
     relayProof: string;
     relayPublicInputs: string;
     ipfsHash: string;
+    toAddress: string;
   };
 }) => {
   const [userProofCopied, setUserProofCopied] = useState(false);
@@ -207,7 +208,10 @@ export const ProofData = ({
           </div>
           <div className="pt-4">Copy this text and message to the relay bot.</div>
           <div className="flex pt-2">
-            {messageCopyButton} <pre className="mt-1">\bot send {proofDetails.ipfsHash}</pre>
+            {messageCopyButton}{" "}
+            <pre className="mt-1">
+              \bot send {proofDetails.ipfsHash} {proofDetails.toAddress}
+            </pre>
           </div>
         </div>
       </div>
