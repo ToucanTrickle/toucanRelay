@@ -40,6 +40,7 @@ app.post('/getUserTransactionProofs', async (req, res) => {
       assetAddress);
     res.send({"relayTxProof": relayProof});
   } catch(e) {
+    console.log(e)
     res.status(500).send(new Error(e))
   }
 })

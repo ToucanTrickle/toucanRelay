@@ -1,12 +1,14 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { DeployFunction } from "hardhat-deploy/types";
+import { Contract } from "ethers";
 
 /**
- * Deploys a contract named "UserUltraVerifier" using the deployer account
+ * Deploys a contract named "RelayVault" using the deployer account and
+ * constructor arguments set to Ironfish token address, RelayUltraverifier address, UserUltraverifier address, and Ironfish token price, decimals, and price decimals
  *
  * @param hre HardhatRuntimeEnvironment object.
  */
-const deployUserCircuitVerifier: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const deployRelayVault: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   /*
     On localhost, the deployer account is the one that comes with Hardhat, which is already funded.
 
@@ -20,8 +22,24 @@ const deployUserCircuitVerifier: DeployFunction = async function (hre: HardhatRu
   const { deployer } = await hre.getNamedAccounts();
   const { deploy } = hre.deployments;
 
-  await deploy("UserUltraVerifier", {
+  const WIRON = await hre.ethers.getContract<Contract>("WIRON", deployer);
+  const userUltraVerifier = await hre.ethers.getContract<Contract>("UserUltraVerifier", deployer);
+  const relayUltraVerifier = await hre.ethers.getContract<Contract>("RelayUltraVerifier", deployer);
+  const ironPrice = 28200;
+  const ironPriceDecimals = 4;
+  const ironDecimals = 18;
+
+  await deploy("RelayVault", {
     from: deployer,
+    // Contract constructor arguments
+    args: [
+      await WIRON.getAddress(),
+      await userUltraVerifier.getAddress(),
+      await relayUltraVerifier.getAddress(),
+      ironPrice,
+      ironPriceDecimals,
+      ironDecimals,
+    ],
     log: true,
     // autoMine: can be passed to the deploy function to make the deployment process faster on local networks by
     // automatically mining the contract deployment transaction. There is no effect on live networks.
@@ -29,8 +47,8 @@ const deployUserCircuitVerifier: DeployFunction = async function (hre: HardhatRu
   });
 };
 
-module.exports = deployUserCircuitVerifier;
+module.exports = deployRelayVault;
 
 // Tags are useful if you have multiple deploy files and only want to run one of them.
-// e.g. yarn deploy --tags RelayUltraVerifier
-deployUserCircuitVerifier.tags = ["UserUltraVerifier"];
+// e.g. yarn deploy --tags RelayVault
+deployRelayVault.tags = ["RelayVault"];

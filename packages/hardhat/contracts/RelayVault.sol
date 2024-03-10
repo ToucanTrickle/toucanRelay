@@ -65,7 +65,7 @@ contract RelayVault is Ownable {
         bytes32[] calldata userPublicInputs,
         bytes calldata relayProof,
         bytes32[] calldata relayPublicInputs,
-        uint32 amountToSpend,
+        uint256 amountToSpend,
         address transferAsset,
         address payable to
     ) external onlyOwner {
@@ -85,7 +85,7 @@ contract RelayVault is Ownable {
         bytes32[] calldata userPublicInputs,
         bytes calldata relayProof,
         bytes32[] calldata relayPublicInputs,
-        uint32 amountToSpend,
+        uint256 amountToSpend,
         address payable to
     ) external onlyOwner {
 

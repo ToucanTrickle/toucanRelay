@@ -93,7 +93,7 @@ async function transactionProofs(
     for (let i = transactionList.length - 1; i >= 0; i--) {
       content = transactionList[i];
 
-      transferAmount = parseInt(content?.assetBalanceDeltas[0]?.delta) / 10 ** 8;
+      transferAmount = (parseInt(content?.assetBalanceDeltas[0]?.delta) * 10**(9 + 4) )/ 10 ** 8; //18 IRON decimals + 4 decimal price precision
       if (content?.type == "receive") {
         spendLimit += transferAmount;
       } else if (content?.type == "send") {
@@ -116,7 +116,7 @@ async function transactionProofs(
       fee: fee,
       feePriceIRON: feePriceIron,
       hash_path: [hashPath],
-      spend_limit: spendLimit * 10000,
+      spend_limit: spendLimit,
       transferAmount: transferAmount,
       transactionHash: `0x${content?.hash?content.hash:"0000000000000000000000000000000000000000000000000000000000000000"}`,
       root: root.digest(),

@@ -20,6 +20,7 @@ export const ProofData = ({
   const [relayPublicInputsCopied, setRelayPublicInputsCopied] = useState(false);
   const [ipfsHashCopied, setIpfsHashCopied] = useState(false);
   const [messageCopied, setMessageCopied] = useState(false);
+  const discordMessage = `/send ipfs_hash:${proofDetails.ipfsHash} receiver:${proofDetails.toAddress}`;
 
   const userProofCopyButton = (
     <div className="mt-1 pl-2">
@@ -160,7 +161,7 @@ export const ProofData = ({
         />
       ) : (
         <CopyToClipboard
-          text="\bot relay ${proofDetails.ipfsHash}"
+          text={discordMessage}
           onCopy={() => {
             setMessageCopied(true);
             setTimeout(() => {
@@ -206,12 +207,9 @@ export const ProofData = ({
             {ipfsHashCopyButton}
             <pre className="mt-1">IPFS hash: {proofDetails.ipfsHash}</pre>
           </div>
-          <div className="pt-4">Copy this text and message to the relay bot.</div>
+          <div className="pt-4">Copy this text and message to the discord relay bot.</div>
           <div className="flex pt-2">
-            {messageCopyButton}{" "}
-            <pre className="mt-1">
-              \bot send {proofDetails.ipfsHash} {proofDetails.toAddress}
-            </pre>
+            {messageCopyButton} <pre className="mt-1">{discordMessage}</pre>
           </div>
         </div>
       </div>
