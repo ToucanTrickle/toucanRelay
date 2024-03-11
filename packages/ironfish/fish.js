@@ -5,7 +5,7 @@ import { Noir } from "@noir-lang/noir_js";
 import pkg from 'js-sha256';
 const { Message, sha256 } = pkg;
 
-async function createRawTransaction(from, to, amount) {
+async function createRawTransaction(from, to, amount, memo) {
   const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
   const client = await sdk.connectRpc();
 
@@ -13,8 +13,8 @@ async function createRawTransaction(from, to, amount) {
   // const to = '01ad7aa5a5e8a1e49ed5764179f6950fed680dae74c5fc070dec2e391cc02e95';
   // const amount = '10';
   const fee = 1n;
-  const memo = "";
-  const expiration = 173913;
+  // const memo = "";
+  // const expiration = 219515;
   const confirmations = 1;
 
   const options = {
@@ -28,13 +28,12 @@ async function createRawTransaction(from, to, amount) {
       },
     ],
     fee: CurrencyUtils.encode(fee),
-    expiration,
+    // expiration,
     confirmations,
   };
 
   const response = await client.wallet.createTransaction(options);
-  console.log(response);
-  return response;
+  return response.content;
 }
 
 async function transactionProofs(
@@ -48,7 +47,6 @@ async function transactionProofs(
   assetAddress,
 ) {
   try {
-    console.log("generating proofs");
     const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
   
     const relayBackend = new BarretenbergBackend(relaycircuit);
@@ -93,7 +91,7 @@ async function transactionProofs(
     for (let i = transactionList.length - 1; i >= 0; i--) {
       content = transactionList[i];
 
-      transferAmount = (parseInt(content?.assetBalanceDeltas[0]?.delta) * 10**(9 + 4) )/ 10 ** 8; //18 IRON decimals + 4 decimal price precision
+      transferAmount = (parseInt(content?.assetBalanceDeltas[0]?.delta) * 10**(9 + 4) )/ 10 ** 8; //IRON decimals in gwei + 4 decimal price precision
       if (content?.type == "receive") {
         spendLimit += transferAmount;
       } else if (content?.type == "send") {
@@ -122,8 +120,6 @@ async function transactionProofs(
       root: root.digest(),
     };
 
-    console.log(relayInput);
-
     const relayProof = await relay.generateFinalProof(relayInput);
     const relayProofHex = "0x" + Buffer.from(relayProof.proof).toString('hex')
     let relayPublicInputArray = []
@@ -133,6 +129,59 @@ async function transactionProofs(
     throw new Error(e)
   }
 }
+
+async function getSpendLimit(memo) {
+  
+  try {
+    const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
+    const options = {
+      account: process.env.RELAY_BOT_IRONFISH_ACCOUNT,
+      confirmations: 1,
+      notes: true,
+    };
+
+    const client = await sdk.connectRpc();
+    const response = client.wallet.getAccountTransactionsStream(options);
+
+    await response.waitForEnd();
+    const bufferSize = response.bufferSize();
+    let transactionList = [];
+
+    for await (const content of response.contentStream()) {
+      if (transactionList.length == bufferSize) {
+        break;
+      }
+
+      content?.notes?.map((note) => {
+        if (note.memo == memo.slice(0, 32)) {
+          transactionList.push(content);
+        }
+      });
+    }
+
+    console.log(transactionList)
+
+    let content;
+    let spendLimit = 0;
+
+    let transferAmount = 0;
+    for (let i = transactionList.length - 1; i >= 0; i--) {
+      content = transactionList[i];
+
+      transferAmount = parseInt(content?.assetBalanceDeltas[0]?.delta) / 10 ** 8; //scaling down decimals
+      if (content?.type == "receive") {
+        spendLimit += transferAmount;
+      } else if (content?.type == "send") {
+        spendLimit -= transferAmount;
+      }
+    }
+
+    return spendLimit;
+  } catch (e) {
+    return new Error(e);
+  }
+}
+
 
 function numToUint8Array(num) {
   const arr = new Uint8Array(8);
@@ -145,4 +194,4 @@ function numToUint8Array(num) {
   return arr;
 }
 
-export { createRawTransaction, transactionProofs };
+export { createRawTransaction, transactionProofs, getSpendLimit };

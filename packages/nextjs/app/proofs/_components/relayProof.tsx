@@ -64,10 +64,6 @@ export const RelayProof = () => {
     localStorage.setItem("identity", identity.toString());
   }, []);
 
-  const getSpendLimit = useCallback(async () => {
-    setSpendLimit(60);
-  }, []);
-
   const generateProof = useCallback(async () => {
     try {
       setGenerating(true);
@@ -145,11 +141,26 @@ export const RelayProof = () => {
       setGenerating(false);
       setIsProofErrored(false);
     } catch (e) {
-      console.log(e);
       setGenerating(false);
       setIsProofErrored(true);
     }
   }, [selectedChain, selectedAsset, contractData.estimateGas, nullifier, trapdoor, commitment, assetAmount]);
+
+  const getSpendLimit = useCallback(async () => {
+    const spendLimitResp = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getSpendLimit`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+      body: JSON.stringify({
+        commitment: commitment,
+      }),
+    });
+
+    const spendLimitData = await spendLimitResp.json();
+    setSpendLimit(spendLimitData.spendlimit);
+  }, [commitment, setSpendLimit]);
 
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">

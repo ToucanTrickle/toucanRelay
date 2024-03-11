@@ -26,7 +26,7 @@ export const chainAssetDetails = {
     symbol: "LINK",
     address: "0xb1D4538B4571d411F07960EF2838Ce337FE1E80E",
     type: "2",
-    decimals: 9,
+    decimals: 18,
   },
   // [chainNames[1] + " | " + chainAssets[chainNames[1]][0]]: {
   //   symbol: "ETH",

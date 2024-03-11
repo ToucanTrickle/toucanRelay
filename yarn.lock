@@ -2484,6 +2484,7 @@ __metadata:
   dependencies:
     "@ethersproject/providers": ~5.7.2
     "@heroicons/react": ~2.0.11
+    "@ironfish/sdk": ^1.19.0
     "@noir-lang/backend_barretenberg": ^0.22.0
     "@noir-lang/noir_js": ^0.22.0
     "@pinata/sdk": ^2.1.0

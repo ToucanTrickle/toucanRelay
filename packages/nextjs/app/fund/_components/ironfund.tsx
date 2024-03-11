@@ -10,17 +10,36 @@ import { InputBase } from "~~/components/scaffold-eth";
 
 export const Ironfund = () => {
   const [assetAmount, setAssetAmount] = useState<string>("");
+  const [accountName, setAccountName] = useState<string>("");
   const [result, setResult] = useState<string | undefined>();
   const relayIronfishAddress = String(process.env.NEXT_PUBLIC_RELAY_BOT_IRONFISH_ADDRESS);
   const [commitment, setCommitment] = useState<string>();
+  const [isFetching, setIsFetching] = useState(false);
+  const [serializationErrored, setSerializationErrored] = useState(false);
+  const [spendLimit, setSpendLimit] = useState(0);
 
   useEffect(() => {
     const identityString = localStorage.getItem("identity");
+    async function getSpendLimit(commitment: string) {
+      const spendLimitResp = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getSpendLimit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          commitment: commitment,
+        }),
+      });
+
+      const spendLimitData = await spendLimitResp.json();
+      setSpendLimit(spendLimitData.spendlimit);
+    }
 
     if (identityString) {
-      const identity = new Identity(identityString);
-
+      const identity = new Identity(String(identityString));
       setCommitment(identity.commitment.toString(16));
+      getSpendLimit(identity.commitment.toString(16));
     }
   }, []);
 
@@ -31,6 +50,38 @@ export const Ironfund = () => {
 
     localStorage.setItem("identity", identity.toString());
   }, []);
+
+  const generateSerializedTransaction = useCallback(async () => {
+    try {
+      setIsFetching(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getRawTransaction`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify({
+          from: accountName,
+          to: relayIronfishAddress,
+          amount: assetAmount,
+          memo: commitment?.slice(0, 32),
+        }),
+      });
+
+      if (response.status == 200) {
+        const data = await response.json();
+
+        setResult(data.transaction);
+        setSerializationErrored(false);
+        setIsFetching(false);
+      } else {
+        throw new Error("unable to generate relay proof!");
+      }
+    } catch (e) {
+      setSerializationErrored(true);
+      setIsFetching(false);
+    }
+  }, [accountName, assetAmount, commitment, relayIronfishAddress]);
 
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
@@ -48,7 +99,7 @@ export const Ironfund = () => {
                   Memo (*imp: memo has to be added to transaction for it to be indexed by bot):
                 </span>
                 {commitment ? (
-                  <span className="font-medium my-0 px-5 break-words">{commitment}</span>
+                  <span className="font-medium my-0 px-5 break-words">{commitment.slice(0, 32)}</span>
                 ) : (
                   <button
                     className="mx-5 btn btn-secondary btn-sm"
@@ -62,7 +113,7 @@ export const Ironfund = () => {
               </div>
               <div className="flex">
                 <span className="font-bold">Spend Limit:</span>
-                <span className="font-medium my-0 px-5 break-words">60</span>
+                <span className="font-medium my-0 px-5 break-words">{spendLimit} IRON</span>
               </div>
             </div>
             <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
@@ -70,11 +121,16 @@ export const Ironfund = () => {
               <div className="flex flex-col gap-1.5 w-full">
                 <div className="flex items-center ml-2">
                   <span className="text-xs font-medium mr-2 leading-none">transfer amount</span>
-                  <span className="block text-xs font-extralight leading-none">
-                    string (enter amount in the lowest decimal units)
-                  </span>
+                  <span className="block text-xs font-extralight leading-none">(in gwei)</span>
                 </div>
                 <InputBase name="assetAmount" placeholder="$IRON" value={assetAmount} onChange={setAssetAmount} />
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <div className="flex items-center ml-2">
+                  <span className="text-xs font-medium mr-2 leading-none">Account name</span>
+                  <span className="block text-xs font-extralight leading-none">string</span>
+                </div>
+                <InputBase name="accountName" value={accountName} onChange={setAccountName} />
               </div>
               <div className="flex justify-between gap-2 flex-wrap">
                 <div className="flex-grow w-4/5">
@@ -84,12 +140,14 @@ export const Ironfund = () => {
                   className="btn btn-secondary btn-sm"
                   onClick={async () => {
                     // const { data } = await refetch();
-                    setResult("dummy tx data");
+                    await generateSerializedTransaction();
                   }}
-                  // disabled={isFetching}
+                  disabled={isFetching}
                 >
-                  {/* {isFetching && <span className="loading loading-spinner loading-xs"></span>} */}
-                  Generate serialized transaction
+                  {isFetching && <span className="loading loading-spinner loading-xs"></span>}
+                  {!serializationErrored
+                    ? "Generate serialized transaction"
+                    : "Unable to generate serialized transaction! Check inputs and try again."}
                 </button>
               </div>
               <div className="flex justify-center gap-2 flex-wrap">OR</div>

@@ -28,8 +28,6 @@ export async function GET() {
     });
     return new Response(JSON.stringify({ data: response }));
   } catch (e) {
-    console.log(e);
-
     return new Response("Server Error", { status: 500 });
   }
 }
@@ -41,7 +39,6 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ IpfsHash: IpfsHash }));
   } catch (e) {
-    console.log(e);
     return new Response("Server Error", { status: 500 });
   }
 }

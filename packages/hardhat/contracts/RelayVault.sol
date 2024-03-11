@@ -33,6 +33,8 @@ contract RelayVault is Ownable {
 
     uint256 public nativeETHSupply;
 
+    event Relay(string indexed memo);
+
     constructor(address _wIron, UserUltraVerifier _userProofVerifier, RelayUltraVerifier _relayProofVerifier, uint256 _wIronPrice, uint8 _wIronPriceDecimals, uint8 _wIronDecimals)
     Ownable() {
         wIron = _wIron;
@@ -76,7 +78,21 @@ contract RelayVault is Ownable {
 
         require(transferAsset != address(0));
 
+        Asset memory transferAssetDetails = assets[transferAsset];
+
+        // Only integers amounts are supported in ERC20 asset relay, hence decimals scaled down on both sides 
+        require(uint256(relayPublicInputs[33])/(10**9)  == amountToSpend/(10**transferAssetDetails.assetDecimals), "Invalid amount");
+
         require(IERC20(transferAsset).transfer(to, amountToSpend), "Transfer failed");
+
+        bytes memory commitment = abi.encode(userPublicInputs[0]);
+
+        bytes memory memo;
+
+        for (uint32 i = 3; i <= 35; i++ ) {
+          memo[i - 3] = commitment[i];
+        }
+        emit Relay(string(memo));
     }
 
     // Relay function to relay transactions given proofs of spending limit as input
@@ -92,6 +108,9 @@ contract RelayVault is Ownable {
         require(userVerifier.verify(userProof, userPublicInputs), "Invalid user proof");
 
         require(relayVerifier.verify(relayProof, relayPublicInputs), "Invalid relay proof");
+
+        // The relay ether's amount is expressed in gwei
+        require(uint256(relayPublicInputs[33])*(10**9)  == amountToSpend, "Invalid amount");
 
         to.transfer(amountToSpend);
     }

@@ -906,7 +906,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RelayVault: {
-      address: "0xd94BaaEc021D3BFc94bC176a67c3A0c2CAB0961c",
+      address: "0xE70E515B887401D13D53167159AaE3D442de2459",
       abi: [
         {
           inputs: [
@@ -1136,9 +1136,9 @@ const deployedContracts = {
               type: "bytes32[]",
             },
             {
-              internalType: "uint32",
+              internalType: "uint256",
               name: "amountToSpend",
-              type: "uint32",
+              type: "uint256",
             },
             {
               internalType: "address",
@@ -1179,9 +1179,9 @@ const deployedContracts = {
               type: "bytes32[]",
             },
             {
-              internalType: "uint32",
+              internalType: "uint256",
               name: "amountToSpend",
-              type: "uint32",
+              type: "uint256",
             },
             {
               internalType: "address payable",
