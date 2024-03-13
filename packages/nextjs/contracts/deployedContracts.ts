@@ -906,7 +906,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RelayVault: {
-      address: "0xE70E515B887401D13D53167159AaE3D442de2459",
+      address: "0xfF717c3917CC2D9149a7daBb84b4131dcab85881",
       abi: [
         {
           inputs: [
@@ -961,6 +961,19 @@ const deployedContracts = {
             },
           ],
           name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "string",
+              name: "memo",
+              type: "string",
+            },
+          ],
+          name: "Relay",
           type: "event",
         },
         {
@@ -1089,19 +1102,6 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "nativeETHSupply",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "owner",
           outputs: [
             {
@@ -1215,16 +1215,21 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
-          name: "wIRONSupply",
-          outputs: [
+          inputs: [
             {
               internalType: "uint256",
-              name: "",
+              name: "price",
               type: "uint256",
             },
+            {
+              internalType: "uint8",
+              name: "decimals",
+              type: "uint8",
+            },
           ],
-          stateMutability: "view",
+          name: "updateIronPrice",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {

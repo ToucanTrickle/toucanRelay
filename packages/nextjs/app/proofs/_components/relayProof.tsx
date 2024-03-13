@@ -33,12 +33,15 @@ export const RelayProof = () => {
   const walletClient = createWalletClient({
     account,
     chain: chainRPCDetails[selectedChain],
-    transport: http(chainRPCDetails[selectedChain].rpcUrls.default.http[0]),
+    transport: http(),
   });
 
   const contractData = getContract({
-    abi: deployedContracts[421614].RelayVault.abi, //figure out why cannot directly input chainId
-    address: walletClient.account.address,
+    abi: deployedContracts[[chainRPCDetails[selectedChain].id] as unknown as keyof typeof deployedContracts].RelayVault
+      .abi,
+    address:
+      deployedContracts[[chainRPCDetails[selectedChain].id] as unknown as keyof typeof deployedContracts].RelayVault
+        .address,
     walletClient: walletClient,
   });
 
@@ -83,7 +86,7 @@ export const RelayProof = () => {
         },
       );
       const cmcData = await cmcResp.json();
-      const estimatedFees = await contractData.estimateGas.deposit(["0xb1D4538B4571d411F07960EF2838Ce337FE1E80E", 1n]); // for approx estimation of gas fees for calculation of relay proofs
+      const estimatedFees = await contractData.estimateGas.deposit(["0xb1D4538B4571d411F07960EF2838Ce337FE1E80E", 0n]); // for approx estimation of gas fees for calculation of relay proofs
 
       const assetAddress = `${chainAssetDetails[selectedChain + " | " + selectedAsset].address}`;
       const assetPriceIRON = `${parseInt(
@@ -98,7 +101,6 @@ export const RelayProof = () => {
       //Double the gas fees because more computations are involved in verifying relay proofs onchain
       const estFee = `${Number(estimatedFees) * 2}`;
       const fee = estFee;
-      console.log(fee);
       const feePriceIRON = `${parseInt(
         String((cmcData.data.ETH.quote.USD.price / cmcData.data.IRON.quote.USD.price) * 10000),
       )}`;
@@ -141,6 +143,7 @@ export const RelayProof = () => {
       setGenerating(false);
       setIsProofErrored(false);
     } catch (e) {
+      console.log(e);
       setGenerating(false);
       setIsProofErrored(true);
     }

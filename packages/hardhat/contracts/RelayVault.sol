@@ -13,7 +13,6 @@ contract RelayVault is Ownable {
     UserUltraVerifier userVerifier;
     RelayUltraVerifier relayVerifier;
 
-    uint256 public wIRONSupply;
     address public wIron;
     uint256 public ironPrice;
     uint8 public ironPriceDecimals;
@@ -30,8 +29,6 @@ contract RelayVault is Ownable {
 
 
     mapping(address => Asset) public assets;
-
-    uint256 public nativeETHSupply;
 
     event Relay(string indexed memo);
 
@@ -55,10 +52,14 @@ contract RelayVault is Ownable {
         asset.supply += _amount;
 
         uint256 wIronAmount = _convertPrice(token, _amount);
-        IERC20(wIron).transfer(msg.sender, wIronAmount);
+        
+        if(msg.value > 0) {
+          Asset storage transferAssetDetails = assets[address(0)];
+          transferAssetDetails.supply += msg.value;
+          wIronAmount += _convertPrice(address(0), msg.value);
+        }
 
-        nativeETHSupply += msg.value;
-        IERC20(wIron).transfer(msg.sender, msg.value * 1400); // Eth to IRON ratio hardcoded for now, will update later
+        IERC20(wIron).transfer(msg.sender, wIronAmount);
     }
 
     // Relay function to relay transactions given proofs of spending limit as input
@@ -131,10 +132,20 @@ contract RelayVault is Ownable {
             asset.supply = 0;
     }
 
+    function updateIronPrice(uint256 price, uint8 decimals) external onlyOwner {
+      ironPrice = price;
+      ironPriceDecimals = decimals;
+    }
+
     receive() external payable {
         // This function is executed when a contract receives plain Ether (without data)
-        nativeETHSupply += msg.value;
-        IERC20(wIron).transfer(msg.sender, msg.value * 1400); // TODO: update based on price feed
+        Asset memory transferAssetDetails = assets[address(0)];
+        
+        require(transferAssetDetails.priceFeed != address(0), "NOT SUPPORTED!");
+        
+        transferAssetDetails.supply += msg.value;
+        uint256 wIronAmount = _convertPrice(address(0), msg.value);
+        IERC20(wIron).transfer(msg.sender, wIronAmount);
     }
 
     function _convertPrice(

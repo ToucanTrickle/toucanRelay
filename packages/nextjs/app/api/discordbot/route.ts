@@ -14,8 +14,8 @@ export async function POST(req: Request) {
     });
 
     const contractData = getContract({
-      abi: deployedContracts[421614].RelayVault.abi, //figure out why cannot directly input chainId
-      address: deployedContracts[421614].RelayVault.address,
+      abi: deployedContracts[[reqData.chainId] as unknown as keyof typeof deployedContracts].RelayVault.abi, //figure out why cannot directly input chainId
+      address: deployedContracts[[reqData.chainId] as unknown as keyof typeof deployedContracts].RelayVault.address,
       walletClient: walletClient,
     });
 
