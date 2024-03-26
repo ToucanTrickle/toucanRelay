@@ -135,6 +135,7 @@ export const RelayProof = () => {
             : BigInt(assetAmount) * 10n ** BigInt(chainAssetDetails[selectedChain + " | " + selectedAsset].decimals)
           ).toString(),
           transferAsset: chainAssetDetails[selectedChain + " | " + selectedAsset].address,
+          memo: commitment?.slice(0, 32),
         }),
       });
       const ipfsHash = await ipfsRes.text();

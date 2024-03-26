@@ -27,6 +27,7 @@ export async function POST(req: Request) {
         reqData.relayPublicInputs,
         reqData.amount,
         reqData.receiverAddress,
+        reqData.memo,
       ]);
       return new Response(JSON.stringify({ transaction: tx }));
     } else {
@@ -38,6 +39,7 @@ export async function POST(req: Request) {
         reqData.amount,
         reqData.transferAsset,
         reqData.receiverAddress,
+        reqData.memo,
       ]);
       return new Response(JSON.stringify({ transaction: tx }));
     }

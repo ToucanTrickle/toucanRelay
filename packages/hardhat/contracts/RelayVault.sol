@@ -30,6 +30,8 @@ contract RelayVault is Ownable {
 
     mapping(address => Asset) public assets;
 
+    mapping(bytes32 => bytes32) private roots;
+
     event Relay(string indexed memo);
 
     constructor(address _wIron, UserUltraVerifier _userProofVerifier, RelayUltraVerifier _relayProofVerifier, uint256 _wIronPrice, uint8 _wIronPriceDecimals, uint8 _wIronDecimals)
@@ -70,7 +72,8 @@ contract RelayVault is Ownable {
         bytes32[] calldata relayPublicInputs,
         uint256 amountToSpend,
         address transferAsset,
-        address payable to
+        address payable to,
+        string memory memo
     ) external onlyOwner {
 
         require(userVerifier.verify(userProof, userPublicInputs), "Invalid user proof");
@@ -86,14 +89,7 @@ contract RelayVault is Ownable {
 
         require(IERC20(transferAsset).transfer(to, amountToSpend), "Transfer failed");
 
-        bytes memory commitment = abi.encode(userPublicInputs[0]);
-
-        bytes memory memo;
-
-        for (uint32 i = 3; i <= 35; i++ ) {
-          memo[i - 3] = commitment[i];
-        }
-        emit Relay(string(memo));
+        emit Relay(memo);
     }
 
     // Relay function to relay transactions given proofs of spending limit as input
@@ -103,7 +99,8 @@ contract RelayVault is Ownable {
         bytes calldata relayProof,
         bytes32[] calldata relayPublicInputs,
         uint256 amountToSpend,
-        address payable to
+        address payable to,
+        string memory memo
     ) external onlyOwner {
 
         require(userVerifier.verify(userProof, userPublicInputs), "Invalid user proof");
@@ -114,6 +111,13 @@ contract RelayVault is Ownable {
         require(uint256(relayPublicInputs[33])*(10**9)  == amountToSpend, "Invalid amount");
 
         to.transfer(amountToSpend);
+
+        emit Relay(memo);
+    }
+
+    function getRootSHA256(bytes32[] calldata relayPublicInputs) external pure returns (bytes32) {
+      bytes32[] memory root = relayPublicInputs[1:33];
+      return sha256(abi.encodePacked(root));
     }
 
     function addSupportedAsset(

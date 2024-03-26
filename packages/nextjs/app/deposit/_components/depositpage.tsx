@@ -174,7 +174,6 @@ export const DepositPage = () => {
       setDepositing(false);
       setIsTransactionErrored(false);
     } catch (e) {
-      console.log(e);
       setDepositing(false);
       setIsTransactionErrored(true);
     }
