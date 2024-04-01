@@ -38,7 +38,6 @@ async function transactionProofs(
   userIdNullifier: string,
   userIdTrapdoor: string,
   userIdCommitment: string,
-  ironfishAccount: string,
   amountToSpend: string,
   assetPriceIron: string,
   assetType: string,
@@ -67,7 +66,6 @@ async function transactionProofs(
     },
     body: JSON.stringify({
       userIdCommitment: userIdCommitment,
-      ironfishAccount: ironfishAccount,
       amountToSpend: amountToSpend,
       assetPriceIron: assetPriceIron,
       assetType: assetType,

@@ -27,6 +27,7 @@ export const RelayProof = () => {
   const [ipfsHash, setIpfsHash] = useState<string>();
   const [generating, setGenerating] = useState(false);
   const [isProofErrored, setIsProofErrored] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
   const [, setChainId] = useState<number>(1);
 
   const account = privateKeyToAccount(`0x${String(process.env.NEXT_PUBLIC_RELAY_EVM_PRIVATE_KEY)}`);
@@ -108,7 +109,6 @@ export const RelayProof = () => {
         `0x${nullifier}`,
         `0x${trapdoor}`,
         `0x${commitment}`,
-        String(process.env.NEXT_PUBLIC_RELAY_BOT_IRONFISH_ACCOUNT),
         `0x${assetType == "1" ? assetAmount.toString(16) : (BigInt(assetAmount) * 10n ** 9n).toString(16)}`,
         assetPriceIRON,
         assetType,
@@ -151,6 +151,7 @@ export const RelayProof = () => {
   }, [selectedChain, selectedAsset, contractData.estimateGas, nullifier, trapdoor, commitment, assetAmount]);
 
   const getSpendLimit = useCallback(async () => {
+    setIsFetching(true);
     const spendLimitResp = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getSpendLimit`, {
       method: "POST",
       headers: {
@@ -163,6 +164,7 @@ export const RelayProof = () => {
     });
 
     const spendLimitData = await spendLimitResp.json();
+    setIsFetching(false);
     setSpendLimit(spendLimitData.spendlimit);
   }, [commitment, setSpendLimit]);
 
@@ -224,7 +226,7 @@ export const RelayProof = () => {
                 onClick={async () => {
                   getSpendLimit();
                 }}
-                // disabled={isFetching}
+                disabled={isFetching}
               >
                 {/* {isFetching && <span className="loading loading-spinner loading-xs"></span>} */}
                 Get Spend Limit

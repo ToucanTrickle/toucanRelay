@@ -2,6 +2,7 @@ import relaycircuit from "../circuits/relay_circuit/target/relay_circuit.json" a
 import { CurrencyUtils, IronfishSdk } from "@ironfish/sdk";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
+import {Contract, ethers} from "ethers";
 import pkg from 'js-sha256';
 const { Message, sha256 } = pkg;
 
@@ -9,26 +10,18 @@ async function createRawTransaction(from, to, amount, memo) {
   const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
   const client = await sdk.connectRpc();
 
-  // const from = 'acc2';
-  // const to = '01ad7aa5a5e8a1e49ed5764179f6950fed680dae74c5fc070dec2e391cc02e95';
-  // const amount = '10';
   const fee = 1n;
-  // const memo = "";
-  // const expiration = 219515;
   const confirmations = 1;
-
   const options = {
     account: from,
     outputs: [
       {
         publicAddress: to,
         amount: CurrencyUtils.encode(amount),
-        memo,
-        // assetId,
+        memo: memo,
       },
     ],
     fee: CurrencyUtils.encode(fee),
-    // expiration,
     confirmations,
   };
 
@@ -38,7 +31,6 @@ async function createRawTransaction(from, to, amount, memo) {
 
 async function transactionProofs(
   userIdCommitment,
-  ironfishAccount,
   amountToSpend,
   assetPriceIron,
   assetType,
@@ -47,21 +39,9 @@ async function transactionProofs(
   assetAddress,
 ) {
   try {
-    const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
-  
     const relayBackend = new BarretenbergBackend(relaycircuit);
     const relay = new Noir(relaycircuit, relayBackend);
     
-    const client = await sdk.connectRpc();
-    const confirmations = 1;
-
-    const options = {
-      account: ironfishAccount,
-      confirmations,
-      notes: true
-    };
-
-    const response = client.wallet.getAccountTransactionsStream(options);
     let hashPath = sha256.update(new Uint8Array([0, 0, 0])).array();
     let initial_commitment = sha256.update(`0x0000000000000000000000000000000000000000000000000000000000000000`);
     initial_commitment = initial_commitment.update(sha256.update(numToUint8Array(0)).digest());
@@ -70,35 +50,20 @@ async function transactionProofs(
 
     let root = initial_leaf.update(hashPath);
     let spendLimit = 0;
-    await response.waitForEnd();
-    const bufferSize = response.bufferSize();
-    var transactionList = [];
-    for await (const content of response.contentStream()) {
-      if (transactionList.length == bufferSize) {
-        break;
-      }
-
-      content?.notes?.map((note) => {
-        if(note.memo == userIdCommitment.slice(2, 34)) {
-          transactionList.push(content);
-        }
-      })
-    }
+    const transactionList = await getTransactionList(userIdCommitment.slice(2))
 
     let content;
-    
-    let transferAmount = 0;
-    for (let i = transactionList.length - 1; i >= 0; i--) {
+    for (let i = 0; i < transactionList.length; i++) {
       content = transactionList[i];
 
-      transferAmount = (parseInt(content?.assetBalanceDeltas[0]?.delta) * 10**(9 + 4) )/ 10 ** 8; //IRON decimals in gwei + 4 decimal price precision
+      // transferAmount = (parseInt(content?.value) * 10**(5) ); //IRON decimals in gwei + 4 decimal price precision - 8 decimals
       if (content?.type == "receive") {
-        spendLimit += transferAmount;
+        spendLimit += content?.value;
       } else if (content?.type == "send") {
-        spendLimit -= transferAmount;
+        spendLimit -= content?.value;
       }
-      let commitment = sha256.update(`0x${content?.hash}`);
-      commitment = commitment.update(sha256.update(numToUint8Array(transferAmount)).digest());
+      let commitment = sha256.update(content?.hash);
+      commitment = commitment.update(sha256.update(numToUint8Array(content?.value)).digest());
       commitment = commitment.update(sha256.update(numToUint8Array(spendLimit)).digest());
       const leaf = sha256.update(commitment.array());
       hashPath = root.array();
@@ -115,8 +80,8 @@ async function transactionProofs(
       feePriceIRON: feePriceIron,
       hash_path: [hashPath],
       spend_limit: spendLimit,
-      transferAmount: transferAmount,
-      transactionHash: `0x${content?.hash?content.hash:"0000000000000000000000000000000000000000000000000000000000000000"}`,
+      transferAmount: content?.value,
+      transactionHash: `${content?.hash?content.hash:"0x0000000000000000000000000000000000000000000000000000000000000000"}`,
       root: root.digest(),
     };
 
@@ -126,6 +91,7 @@ async function transactionProofs(
     relayProof.publicInputs.forEach((v) => relayPublicInputArray.push(v))
     return { relayProof: {proof: relayProofHex, publicInputs: relayPublicInputArray} };
   } catch (e) {
+    console.log(e)
     throw new Error(e)
   }
 }
@@ -133,6 +99,141 @@ async function transactionProofs(
 async function getSpendLimit(memo) {
   
   try {
+    const transactionList = await getTransactionList(memo)
+
+    console.log(transactionList)
+
+    let content;
+    let spendLimit = 0;
+
+    for (let i = 0; i < transactionList.length; i++) {
+      content = transactionList[i];
+
+      if (content?.type == "receive") {
+        spendLimit += content.value;
+      } else if (content?.type == "send") {
+        spendLimit -= content.value;
+      }
+    }
+
+    return spendLimit/10**13;
+  } catch (e) {
+    console.log(e)
+    return 0;
+  }
+}
+
+async function getTransactionList(memo) {
+  let transactionList = [];
+  try {
+    const provider = new ethers.JsonRpcProvider("https://sepolia-rollup.arbitrum.io/rpc")
+    const contract = new Contract(process.env.RELAY_BOT_ARBITRUM_SEPOLIA_CONTRACT, [{
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "string",
+          "name": "memo",
+          "type": "string"
+        }
+      ],
+      "name": "Relay",
+      "type": "event"
+    }], provider);
+
+    
+
+    const eventDetails = (await contract.queryFilter("Relay")).filter((e) => (e.topics[1] == ethers.keccak256(Buffer.from(memo.slice(0, 32)))));
+    
+    await Promise.all(eventDetails.map(async (event) => {
+      const block = await provider.getBlock(event.blockNumber);
+      const transactionReceipt = await provider.getTransactionReceipt(event.transactionHash)
+      const transactionEvent = transactionReceipt.logs;
+      const tokenContract = new Contract(transactionEvent[0].address, [{
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "from",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "to",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "value",
+            "type": "uint256"
+          }
+        ],
+        "name": "Transfer",
+        "type": "event"
+      }, {
+        "inputs": [],
+        "name": "decimals",
+        "outputs": [
+          {
+            "internalType": "uint8",
+            "name": "",
+            "type": "uint8"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }, {
+        "inputs": [],
+        "name": "symbol",
+        "outputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }], provider)
+      const decimals = await tokenContract.decimals();
+      const symbol = await tokenContract.symbol();
+      
+      const cmcResp = await fetch(
+        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=IRON,ETH,${
+          symbol
+        }`,
+        {
+          method: "GET",
+          headers: {
+            "X-CMC_PRO_API_KEY": String(process.env.CMC_API_KEY),
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "*",
+            "Content-Type": "application/json",
+          },
+        },
+      );
+      const cmcData = await cmcResp.json();
+      const assetPriceIRON = `${parseInt(
+        String(
+          (cmcData.data[symbol].quote.USD.price /
+            cmcData.data.IRON.quote.USD.price) *
+            10000,
+        ),
+      )}`;
+
+      transactionList.push({
+        type: "send",
+        value: parseInt((transactionEvent[0].data/10**parseInt(decimals)) * assetPriceIRON * 10**9), // need to convert to the IRON equivalent based on price
+        timestamp: block.timestamp * 1000, //in microseconds
+        chain: "evm",
+        index: transactionEvent[0].index,
+        hash: transactionEvent[0].transactionHash
+      })
+    }));
+
     const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
     const options = {
       account: process.env.RELAY_BOT_IRONFISH_ACCOUNT,
@@ -145,40 +246,40 @@ async function getSpendLimit(memo) {
 
     await response.waitForEnd();
     const bufferSize = response.bufferSize();
-    let transactionList = [];
-
+    
+    let totalReceived = 0;
     for await (const content of response.contentStream()) {
-      if (transactionList.length == bufferSize) {
+      totalReceived += 1
+      if (totalReceived == bufferSize) {
         break;
       }
-
-      content?.notes?.map((note) => {
+      
+      content?.notes?.map((note, idx) => {
+        
         if (note.memo == memo.slice(0, 32)) {
-          transactionList.push(content);
+          transactionList.push({
+            type: content.type,
+            value: parseInt(note?.value) * 10**(5), //IRON decimals in gwei + 4 decimal price precision - 8 decimals
+            timestamp: content.timestamp,
+            chain: "ironfish",
+            index: idx,
+            hash: `0x${note.transactionHash}`
+          });
         }
       });
     }
 
-    console.log(transactionList)
-
-    let content;
-    let spendLimit = 0;
-
-    let transferAmount = 0;
-    for (let i = transactionList.length - 1; i >= 0; i--) {
-      content = transactionList[i];
-
-      transferAmount = parseInt(content?.assetBalanceDeltas[0]?.delta) / 10 ** 8; //scaling down decimals
-      if (content?.type == "receive") {
-        spendLimit += transferAmount;
-      } else if (content?.type == "send") {
-        spendLimit -= transferAmount;
+    transactionList.sort((a, b) => {
+      if (a.timestamp === b.timestamp){
+        return a.index < b.index ? -1 : 1
+      } else {
+        return a.timestamp < b.timestamp ? -1 : 1
       }
-    }
-
-    return spendLimit;
-  } catch (e) {
-    return new Error(e);
+    })
+    return transactionList
+  } catch(e) {
+    console.log(e);
+    return transactionList;
   }
 }
 

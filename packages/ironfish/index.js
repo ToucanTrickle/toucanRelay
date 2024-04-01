@@ -23,7 +23,6 @@ app.post('/getRawTransaction', async (req, res) => {
 app.post('/getUserTransactionProofs', async (req, res) => {
   try {
     const {userIdCommitment,
-      ironfishAccount,
       amountToSpend,
       assetPriceIron,
       assetType,
@@ -32,7 +31,6 @@ app.post('/getUserTransactionProofs', async (req, res) => {
       assetAddress} = req.body
     const {relayProof} = await transactionProofs(
       userIdCommitment,
-      ironfishAccount,
       amountToSpend,
       assetPriceIron,
       assetType,
@@ -47,7 +45,7 @@ app.post('/getUserTransactionProofs', async (req, res) => {
 
 app.post('/getSpendLimit', async (req, res) => {
   try {
-    const commitment = req.body.commitment
+    const {commitment} = req.body
     const spendLimit = await getSpendLimit(commitment)
     res.send({"spendlimit": spendLimit})
   } catch(e) {
