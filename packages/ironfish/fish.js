@@ -1,4 +1,5 @@
 import relaycircuit from "../circuits/relay_circuit/target/relay_circuit.json" assert { type: "json" };
+import abi from './abi/WIron.js';
 import { CurrencyUtils, IronfishSdk } from "@ironfish/sdk";
 import { BarretenbergBackend } from "@noir-lang/backend_barretenberg";
 import { Noir } from "@noir-lang/noir_js";
@@ -283,6 +284,36 @@ async function getTransactionList(memo) {
   }
 }
 
+async function checkAndUpdateSupply() {
+  try {
+    const sdk = await IronfishSdk.init({ dataDir: "~/.ironfish" });
+    
+    const client = await sdk.connectRpc();
+
+    const {contract} = connectWIron();
+    const totalSupply = await contract.totalSupply()
+    console.log(totalSupply);
+
+    const balance = await client.wallet.getAccountBalance({
+      account: process.env.RELAY_BOT_IRONFISH_ACCOUNT,
+      confirmations: 3,
+    })
+
+
+
+    if (BigInt(balance.content.available * (10**10)) > totalSupply) {
+      const tx = await contract.mint(
+        process.env.RELAY_BOT_ARBITRUM_SEPOLIA_CONTRACT,
+        // TODO handle potential error here string -> bigint
+        BigInt(balance.content.available * (10**10)) - totalSupply,
+      );
+      console.log(tx)
+    }
+  } catch(e) {
+    console.log(e)
+  }
+}
+
 
 function numToUint8Array(num) {
   const arr = new Uint8Array(8);
@@ -295,4 +326,12 @@ function numToUint8Array(num) {
   return arr;
 }
 
-export { createRawTransaction, transactionProofs, getSpendLimit };
+function connectWIron() {
+  const wIronDeployerPrivateKey = process.env.RELAY_EVM_PRIVATE_KEY;
+  const provider = new ethers.JsonRpcProvider(process.env.EVM_RPC_URL);
+  const wallet = new ethers.Wallet(wIronDeployerPrivateKey, provider);
+  const contract = new ethers.Contract(process.env.WIRON_CONTRACT_ADDRESS, abi, wallet)
+  return { provider, contract };
+}
+
+export { createRawTransaction, transactionProofs, getSpendLimit, checkAndUpdateSupply };

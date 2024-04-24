@@ -41,3 +41,6 @@ export const chainAssetDetails = {
   //   decimals: 18,
   // },
 };
+export const chainIdToChain = {
+  421614: arbitrumSepolia,
+};

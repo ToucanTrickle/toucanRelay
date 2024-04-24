@@ -91,7 +91,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RelayVault: {
-      address: "0xd6eBb57e9EAafFe3f5Fae0D364952C5F33C518d1",
+      address: "0x2587Da37f13A3caCd764171fee0220Ba5C33111d",
       abi: [
         {
           inputs: [
@@ -244,6 +244,25 @@ const deployedContracts = {
           name: "deposit",
           outputs: [],
           stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "bytes32[]",
+              name: "relayPublicInputs",
+              type: "bytes32[]",
+            },
+          ],
+          name: "getRootSHA256",
+          outputs: [
+            {
+              internalType: "bytes32",
+              name: "",
+              type: "bytes32",
+            },
+          ],
+          stateMutability: "pure",
           type: "function",
         },
         {
@@ -536,16 +555,10 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     WIRON: {
-      address: "0xAcc3C09A923E1FC2bEA39f38D07D0BC6485a92dc",
+      address: "0x79270f6c9cB62A7522C8e897ADB111d712cFa7Df",
       abi: [
         {
-          inputs: [
-            {
-              internalType: "uint256",
-              name: "initialSupply",
-              type: "uint256",
-            },
-          ],
+          inputs: [],
           stateMutability: "nonpayable",
           type: "constructor",
         },
@@ -580,6 +593,38 @@ const deployedContracts = {
             {
               indexed: true,
               internalType: "address",
+              name: "previousOwner",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "OwnershipTransferred",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Paused",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
               name: "from",
               type: "address",
             },
@@ -597,6 +642,50 @@ const deployedContracts = {
             },
           ],
           name: "Transfer",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: "address",
+              name: "from",
+              type: "address",
+            },
+            {
+              indexed: true,
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "value",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "bytes",
+              name: "metadata",
+              type: "bytes",
+            },
+          ],
+          name: "TransferWithMetadata",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+          ],
+          name: "Unpaused",
           type: "event",
         },
         {
@@ -667,6 +756,37 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "burn",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "burnFrom",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "decimals",
           outputs: [
@@ -728,6 +848,24 @@ const deployedContracts = {
           type: "function",
         },
         {
+          inputs: [
+            {
+              internalType: "address",
+              name: "account",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
+          name: "mint",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
           inputs: [],
           name: "name",
           outputs: [
@@ -738,6 +876,46 @@ const deployedContracts = {
             },
           ],
           stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "pause",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "paused",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "renounceOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
           type: "function",
         },
         {
@@ -819,19 +997,80 @@ const deployedContracts = {
           stateMutability: "nonpayable",
           type: "function",
         },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "newOwner",
+              type: "address",
+            },
+          ],
+          name: "transferOwnership",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "to",
+              type: "address",
+            },
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+            {
+              internalType: "bytes",
+              name: "metadata",
+              type: "bytes",
+            },
+          ],
+          name: "transferWithMetadata",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "unpause",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
       ],
       inheritedFunctions: {
-        allowance: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        approve: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        balanceOf: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        decimals: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        decreaseAllowance: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        increaseAllowance: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        name: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        symbol: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        totalSupply: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        transfer: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
-        transferFrom: "@openzeppelin/contracts/token/ERC20/ERC20.sol",
+        allowance:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        approve:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        balanceOf:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        decimals:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        decreaseAllowance:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        increaseAllowance:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        name: "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        symbol:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        totalSupply:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        transfer:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        transferFrom:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        burn: "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+        burnFrom:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol",
+        paused:
+          "@openzeppelin/contracts/token/ERC20/extensions/ERC20Pausable.sol",
+        owner: "@openzeppelin/contracts/access/Ownable.sol",
+        renounceOwnership: "@openzeppelin/contracts/access/Ownable.sol",
+        transferOwnership: "@openzeppelin/contracts/access/Ownable.sol",
       },
     },
   },

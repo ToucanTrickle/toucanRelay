@@ -1,8 +1,9 @@
 import express from 'express'
 import cors from 'cors'
 import { sha256 } from 'js-sha256'
-
-import { createRawTransaction, getSpendLimit, transactionProofs } from './fish.js'
+import pkg from 'node-cron';
+const {schedule} = pkg;
+import { createRawTransaction, getSpendLimit, transactionProofs, checkAndUpdateSupply } from './fish.js'
 import dotenv from 'dotenv'
 dotenv.config()
 
@@ -10,6 +11,12 @@ const app = express()
 const port = 3080
 app.use(cors())
 app.use(express.json())
+
+const task = schedule('* * * * *', async () =>  {
+  checkAndUpdateSupply()
+});
+
+task.start();
 
 app.post('/getRawTransaction', async (req, res) => {
   try {

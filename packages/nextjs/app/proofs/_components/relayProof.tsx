@@ -4,8 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { transactionProofs } from "../proofGenerator/ironfish";
 import { ProofData } from "./proofData";
 import { Identity } from "@semaphore-protocol/identity";
-import { createWalletClient, getContract, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { createPublicClient, getContract, http } from "viem";
+import { useAccount } from "wagmi";
 import { InputBase } from "~~/components/scaffold-eth";
 import { AddressInput } from "~~/components/scaffold-eth";
 import { chainAssetDetails, chainAssets, chainNames, chainRPCDetails } from "~~/constants/constants";
@@ -30,9 +30,8 @@ export const RelayProof = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [, setChainId] = useState<number>(1);
 
-  const account = privateKeyToAccount(`0x${String(process.env.NEXT_PUBLIC_RELAY_EVM_PRIVATE_KEY)}`);
-  const walletClient = createWalletClient({
-    account,
+  const account = useAccount();
+  const publicClient = createPublicClient({
     chain: chainRPCDetails[selectedChain],
     transport: http(),
   });
@@ -43,7 +42,7 @@ export const RelayProof = () => {
     address:
       deployedContracts[[chainRPCDetails[selectedChain].id] as unknown as keyof typeof deployedContracts].RelayVault
         .address,
-    walletClient: walletClient,
+    publicClient: publicClient,
   });
 
   useEffect(() => {
@@ -87,7 +86,9 @@ export const RelayProof = () => {
         },
       );
       const cmcData = await cmcResp.json();
-      const estimatedFees = await contractData.estimateGas.deposit(["0xb1D4538B4571d411F07960EF2838Ce337FE1E80E", 0n]); // for approx estimation of gas fees for calculation of relay proofs
+      const estimatedFees = await contractData.estimateGas.deposit(["0xb1D4538B4571d411F07960EF2838Ce337FE1E80E", 0n], {
+        account: String(account.address),
+      }); // for approx estimation of gas fees for calculation of relay proofs
 
       const assetAddress = `${chainAssetDetails[selectedChain + " | " + selectedAsset].address}`;
       const assetPriceIRON = `${parseInt(
@@ -122,7 +123,7 @@ export const RelayProof = () => {
       setRelayProof(data.relayTxProof.proof);
       setRelayPublicInputs(JSON.stringify({ publicInputs: data.relayTxProof.publicInputs }));
 
-      const ipfsRes = await fetch("http://localhost:3000/api", {
+      const ipfsRes = await fetch("/api", {
         method: "POST",
         body: JSON.stringify({
           userProof: data.userTxProof.proof,

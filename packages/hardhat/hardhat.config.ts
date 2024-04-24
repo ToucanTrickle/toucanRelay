@@ -64,6 +64,7 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
     arbitrumSepolia: {
+      chainId: 421614,
       url: `https://arb-sepolia.g.alchemy.com/v2/${providerApiKey}`,
       accounts: [deployerPrivateKey],
     },

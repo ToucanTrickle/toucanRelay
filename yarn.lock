@@ -2467,6 +2467,8 @@ __metadata:
     "@ironfish/sdk": ^1.19.0
     "@noir-lang/backend_barretenberg": ^0.22.0
     "@noir-lang/noir_js": ^0.22.0
+    "@typechain/ethers-v6": ^0.5.1
+    "@types/node-cron": ^3
     async: ^3.2.5
     cors: ^2.8.5
     dotenv: ^16.4.4
@@ -2474,6 +2476,8 @@ __metadata:
     express: ^4.18.2
     form-data: ^4.0.0
     js-sha256: ^0.11.0
+    node-cron: ^3.0.3
+    typechain: 8.3.1
     util: ^0.12.5
   languageName: unknown
   linkType: soft
@@ -2976,7 +2980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typechain/ethers-v6@npm:~0.5.1":
+"@typechain/ethers-v6@npm:^0.5.1, @typechain/ethers-v6@npm:~0.5.1":
   version: 0.5.1
   resolution: "@typechain/ethers-v6@npm:0.5.1"
   dependencies:
@@ -3140,6 +3144,13 @@ __metadata:
   version: 0.7.34
   resolution: "@types/ms@npm:0.7.34"
   checksum: f38d36e7b6edecd9badc9cf50474159e9da5fa6965a75186cceaf883278611b9df6669dc3a3cc122b7938d317b68a9e3d573d316fcb35d1be47ec9e468c6bd8a
+  languageName: node
+  linkType: hard
+
+"@types/node-cron@npm:^3":
+  version: 3.0.11
+  resolution: "@types/node-cron@npm:3.0.11"
+  checksum: a73f69bcca52a5f3b1671cfb00a8e4a1d150d0aef36a611564a2f94e66b6981bade577e267ceeeca6fcee241768902d55eb8cf3a81f9ef4ed767a23112fdb16d
   languageName: node
   linkType: hard
 
@@ -11652,6 +11663,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-cron@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "node-cron@npm:3.0.3"
+  dependencies:
+    uuid: 8.3.2
+  checksum: 351c37491ebf717d0ae69cc941465de118e5c2ef5d48bc3f87c98556241b060f100402c8a618c7b86f9f626b44756b20d8b5385b70e52f80716f21e55db0f1c5
+  languageName: node
+  linkType: hard
+
 "node-datachannel@npm:0.5.1":
   version: 0.5.1
   resolution: "node-datachannel@npm:0.5.1"
@@ -15023,6 +15043,28 @@ __metadata:
     media-typer: 0.3.0
     mime-types: ~2.1.24
   checksum: 2c8e47675d55f8b4e404bcf529abdf5036c537a04c2b20177bcf78c9e3c1da69da3942b1346e6edb09e823228c0ee656ef0e033765ec39a70d496ef601a0c657
+  languageName: node
+  linkType: hard
+
+"typechain@npm:8.3.1":
+  version: 8.3.1
+  resolution: "typechain@npm:8.3.1"
+  dependencies:
+    "@types/prettier": ^2.1.1
+    debug: ^4.3.1
+    fs-extra: ^7.0.0
+    glob: 7.1.7
+    js-sha3: ^0.8.0
+    lodash: ^4.17.15
+    mkdirp: ^1.0.4
+    prettier: ^2.3.1
+    ts-command-line-args: ^2.2.0
+    ts-essentials: ^7.0.1
+  peerDependencies:
+    typescript: ">=4.3.0"
+  bin:
+    typechain: dist/cli/cli.js
+  checksum: c1e11ab1452d0c83be0c34a8b900b156b0c6654b95f7e7bb18dd98c0decd6009ffa1316e393f4e8def187af1bea3e931a13503815cc37155c0c945b7ae5b5215
   languageName: node
   linkType: hard
 
