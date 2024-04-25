@@ -28,6 +28,7 @@ export const RelayProof = () => {
   const [generating, setGenerating] = useState(false);
   const [isProofErrored, setIsProofErrored] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  const [currentSupply, setCurrentSupply] = useState(0);
   const [, setChainId] = useState<number>(1);
 
   const account = useAccount();
@@ -55,7 +56,17 @@ export const RelayProof = () => {
       setTrapdoor(identity.trapdoor.toString(16));
       setCommitment(identity.commitment.toString(16));
     }
-  }, []);
+
+    async function getSupply() {
+      const assetDetails = await contractData.read.assets([
+        chainAssetDetails[selectedChain + " | " + selectedAsset].address,
+      ]);
+      console.log(assetDetails);
+      setCurrentSupply(parseInt(assetDetails[3].toString()));
+    }
+
+    getSupply();
+  }, [contractData.read, selectedAsset, selectedChain]);
 
   const createIdentity = useCallback(async () => {
     const identity = new Identity();
@@ -149,7 +160,16 @@ export const RelayProof = () => {
       setGenerating(false);
       setIsProofErrored(true);
     }
-  }, [selectedChain, selectedAsset, contractData.estimateGas, nullifier, trapdoor, commitment, assetAmount]);
+  }, [
+    selectedChain,
+    selectedAsset,
+    contractData.estimateGas,
+    account.address,
+    nullifier,
+    trapdoor,
+    commitment,
+    assetAmount,
+  ]);
 
   const getSpendLimit = useCallback(async () => {
     setIsFetching(true);
@@ -283,6 +303,7 @@ export const RelayProof = () => {
                           {chainAsset}
                         </button>
                       ))}
+                      <div className="ml-5">current supply = {currentSupply}</div>
                     </div>
                   )}
                 </>
