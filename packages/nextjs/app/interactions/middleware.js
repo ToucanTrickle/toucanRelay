@@ -5,7 +5,7 @@ export function middleware(req) {
   const signature = req.get("X-Signature-Ed25519");
   const timestamp = req.get("X-Signature-Timestamp");
 
-  const isValidRequest = verifyKey(buf, signature, timestamp, clientKey);
+  const isValidRequest = verifyKey(buf, signature, timestamp, process.env.PUBLIC_KEY);
   if (!isValidRequest) {
     res.status(401).send("Bad request signature");
     throw new Error("Bad request signature");
