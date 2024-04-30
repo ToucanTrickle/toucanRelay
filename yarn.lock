@@ -2507,6 +2507,7 @@ __metadata:
     autoprefixer: ~10.4.12
     blo: ~1.0.1
     daisyui: 4.5.0
+    discord-interactions: 3.4.0
     eslint: ~8.24.0
     eslint-config-next: ~14.0.4
     eslint-config-prettier: ~8.5.0
@@ -6639,6 +6640,15 @@ __metadata:
   dependencies:
     path-type: ^4.0.0
   checksum: fa05e18324510d7283f55862f3161c6759a3f2f8dbce491a2fc14c8324c498286c54282c1f0e933cb930da8419b30679389499b919122952a4f8592362ef4615
+  languageName: node
+  linkType: hard
+
+"discord-interactions@npm:3.4.0":
+  version: 3.4.0
+  resolution: "discord-interactions@npm:3.4.0"
+  dependencies:
+    tweetnacl: ^1.0.3
+  checksum: 0e458e0e1a16093c45a475750f5a3a6a5c9dfb274a877b2c6f9dc924f74c8d0fd89351c7ed7124c51ff3e307004e12cb6535c1b276f46b9849c998840566c9ae
   languageName: node
   linkType: hard
 
