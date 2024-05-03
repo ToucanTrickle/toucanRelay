@@ -10,7 +10,10 @@ dotenv.config()
 const app = express()
 const port = 3080
 app.use(cors())
-app.use(`${process.env.MOUNT_PATH}`, express.json())
+
+const router = express();
+app.use(`${process.env.MOUNT_PATH}`, router)
+router.use(express.json())
 
 const task = schedule('* * * * *', async () =>  {
   checkAndUpdateSupply()
@@ -18,11 +21,11 @@ const task = schedule('* * * * *', async () =>  {
 
 task.start();
 
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.send('Hello World!')
 })
 
-app.post('/getRawTransaction', async (req, res) => {
+router.post('/getRawTransaction', async (req, res) => {
   try {
     const tx = await createRawTransaction(req.body.from, req.body.to, req.body.amount, req.body.memo);
     res.send(tx);
@@ -31,7 +34,7 @@ app.post('/getRawTransaction', async (req, res) => {
   }
 })
 
-app.post('/getUserTransactionProofs', async (req, res) => {
+router.post('/getUserTransactionProofs', async (req, res) => {
   try {
     const {userIdCommitment,
       amountToSpend,
@@ -54,7 +57,7 @@ app.post('/getUserTransactionProofs', async (req, res) => {
   }
 })
 
-app.post('/getSpendLimit', async (req, res) => {
+router.post('/getSpendLimit', async (req, res) => {
   try {
     const {commitment} = req.body
     const spendLimit = await getSpendLimit(commitment)

@@ -302,6 +302,7 @@ async function checkAndUpdateSupply() {
 
 
     if (BigInt(balance.content.available * (10**10)) > totalSupply) {
+      console.log("minting $WIRON")
       const tx = await contract.mint(
         process.env.RELAY_BOT_ARBITRUM_SEPOLIA_CONTRACT,
         // TODO handle potential error here string -> bigint
