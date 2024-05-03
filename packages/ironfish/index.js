@@ -18,6 +18,10 @@ const task = schedule('* * * * *', async () =>  {
 
 task.start();
 
+app.get('/', (req, res) => {
+  res.send('Hello World!')
+})
+
 app.post('/getRawTransaction', async (req, res) => {
   try {
     const tx = await createRawTransaction(req.body.from, req.body.to, req.body.amount, req.body.memo);
