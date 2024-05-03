@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { SerializedTx } from "./serializedTx";
+// import { SerializedTx } from "./serializedTx";
 import { TxDetails } from "./txDetails";
 import { Identity } from "@semaphore-protocol/identity";
 import { InputBase } from "~~/components/scaffold-eth";
@@ -10,12 +10,12 @@ import { InputBase } from "~~/components/scaffold-eth";
 
 export const Ironfund = () => {
   const [assetAmount, setAssetAmount] = useState<string>("");
-  const [accountName, setAccountName] = useState<string>("");
-  const [result, setResult] = useState<string | undefined>();
+  // const [accountName, setAccountName] = useState<string>("");
+  // const [result, setResult] = useState<string | undefined>();
   const relayIronfishAddress = String(process.env.NEXT_PUBLIC_RELAY_BOT_IRONFISH_ADDRESS);
   const [commitment, setCommitment] = useState<string>();
-  const [isFetching, setIsFetching] = useState(false);
-  const [serializationErrored, setSerializationErrored] = useState(false);
+  // const [isFetching, setIsFetching] = useState(false);
+  // const [serializationErrored, setSerializationErrored] = useState(false);
   const [spendLimit, setSpendLimit] = useState(0);
 
   useEffect(() => {
@@ -51,37 +51,37 @@ export const Ironfund = () => {
     localStorage.setItem("identity", identity.toString());
   }, []);
 
-  const generateSerializedTransaction = useCallback(async () => {
-    try {
-      setIsFetching(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getRawTransaction`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-        body: JSON.stringify({
-          from: accountName,
-          to: relayIronfishAddress,
-          amount: assetAmount,
-          memo: commitment?.slice(0, 32),
-        }),
-      });
+  // const generateSerializedTransaction = useCallback(async () => {
+  //   try {
+  //     setIsFetching(true);
+  //     const response = await fetch(`${process.env.NEXT_PUBLIC_IRONFISH_DATA_URL}/getRawTransaction`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "Access-Control-Allow-Origin": "*",
+  //       },
+  //       body: JSON.stringify({
+  //         from: accountName,
+  //         to: relayIronfishAddress,
+  //         amount: assetAmount,
+  //         memo: commitment?.slice(0, 32),
+  //       }),
+  //     });
 
-      if (response.status == 200) {
-        const data = await response.json();
+  //     if (response.status == 200) {
+  //       const data = await response.json();
 
-        setResult(data.transaction);
-        setSerializationErrored(false);
-        setIsFetching(false);
-      } else {
-        throw new Error("unable to generate relay proof!");
-      }
-    } catch (e) {
-      setSerializationErrored(true);
-      setIsFetching(false);
-    }
-  }, [accountName, assetAmount, commitment, relayIronfishAddress]);
+  //       setResult(data.transaction);
+  //       setSerializationErrored(false);
+  //       setIsFetching(false);
+  //     } else {
+  //       throw new Error("unable to generate relay proof!");
+  //     }
+  //   } catch (e) {
+  //     setSerializationErrored(true);
+  //     setIsFetching(false);
+  //   }
+  // }, [accountName, assetAmount, commitment, relayIronfishAddress]);
 
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
@@ -125,6 +125,7 @@ export const Ironfund = () => {
                 </div>
                 <InputBase name="assetAmount" placeholder="$IRON" value={assetAmount} onChange={setAssetAmount} />
               </div>
+              {/*
               <div className="flex flex-col gap-1.5 w-full">
                 <div className="flex items-center ml-2">
                   <span className="text-xs font-medium mr-2 leading-none">Account name</span>
@@ -150,7 +151,7 @@ export const Ironfund = () => {
                     : "Unable to generate serialized transaction! Check inputs and try again."}
                 </button>
               </div>
-              <div className="flex justify-center gap-2 flex-wrap">OR</div>
+              <div className="flex justify-center gap-2 flex-wrap">OR</div> */}
               <div className="flex justify-between gap-2 flex-wrap">
                 <TxDetails
                   txDetails={{ memo: commitment?.slice(0, 32), amount: assetAmount, to: relayIronfishAddress }}
