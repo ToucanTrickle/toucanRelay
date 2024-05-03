@@ -10,7 +10,7 @@ dotenv.config()
 const app = express()
 const port = 3080
 app.use(cors())
-app.use(express.json())
+app.use(`${process.env.MOUNT_PATH}`, express.json())
 
 const task = schedule('* * * * *', async () =>  {
   checkAndUpdateSupply()
