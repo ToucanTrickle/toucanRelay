@@ -25,7 +25,7 @@ const deployRelayVault: DeployFunction = async function (hre: HardhatRuntimeEnvi
   const WIRON = await hre.ethers.getContract<Contract>("WIRON", deployer);
   const userUltraVerifier = await hre.ethers.getContract<Contract>("UserUltraVerifier", deployer);
   const relayUltraVerifier = await hre.ethers.getContract<Contract>("RelayUltraVerifier", deployer);
-  const ironPrice = 28200;
+  const ironPrice = 17800;
   const ironPriceDecimals = 4;
   const ironDecimals = 18;
 

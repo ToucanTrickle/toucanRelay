@@ -91,7 +91,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     RelayVault: {
-      address: "0x2587Da37f13A3caCd764171fee0220Ba5C33111d",
+      address: "0x34C0D2a7b3c7964722C485d9B03f76a0e36567Ab",
       abi: [
         {
           inputs: [
@@ -555,7 +555,7 @@ const deployedContracts = {
       inheritedFunctions: {},
     },
     WIRON: {
-      address: "0x79270f6c9cB62A7522C8e897ADB111d712cFa7Df",
+      address: "0xa3428093725BCcdf13E4E9F1837937068A9Df00C",
       abi: [
         {
           inputs: [],
@@ -796,7 +796,7 @@ const deployedContracts = {
               type: "uint8",
             },
           ],
-          stateMutability: "view",
+          stateMutability: "pure",
           type: "function",
         },
         {

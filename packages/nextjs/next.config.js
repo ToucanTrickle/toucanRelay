@@ -9,7 +9,7 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: process.env.NEXT_PUBLIC_IGNORE_BUILD_ERROR === "true",
   },
-  basePath: `${process.env.NEXT_PUBLIC_BASE_PATH}`,
+  basePath: `${String(process.env.NEXT_PUBLIC_BASE_PATH)}`,
   webpack: config => {
     config.resolve.fallback = { fs: false, net: false, tls: false };
     config.externals.push("pino-pretty", "lokijs", "encoding");
