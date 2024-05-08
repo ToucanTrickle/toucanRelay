@@ -58,15 +58,25 @@ export const RelayProof = () => {
     }
 
     async function getSupply() {
-      const assetDetails = await contractData.read.assets([
-        chainAssetDetails[selectedChain + " | " + selectedAsset].address,
-      ]);
-      console.log(assetDetails);
-      setCurrentSupply(parseInt(assetDetails[3].toString()));
+      if (
+        chainAssetDetails[selectedChain + " | " + selectedAsset].address != "0x0000000000000000000000000000000000000000"
+      ) {
+        const assetDetails = await contractData.read.assets([
+          chainAssetDetails[selectedChain + " | " + selectedAsset].address,
+        ]);
+        console.log(assetDetails);
+        setCurrentSupply(parseInt(assetDetails[3].toString()) / parseInt(assetDetails[1].toString()));
+      } else {
+        const nativebalance = await publicClient.getBalance({
+          address: contractData.address,
+          blockTag: "latest",
+        });
+        setCurrentSupply(parseFloat((nativebalance / 10n ** 18n).toString()));
+      }
     }
 
     getSupply();
-  }, [contractData.read, selectedAsset, selectedChain]);
+  }, [contractData.address, contractData.read, publicClient, selectedAsset, selectedChain]);
 
   const createIdentity = useCallback(async () => {
     const identity = new Identity();
@@ -303,7 +313,10 @@ export const RelayProof = () => {
                           {chainAsset}
                         </button>
                       ))}
-                      <div className="ml-5">current supply = {currentSupply}</div>
+                      <div className="ml-5">
+                        current supply = {currentSupply} in{" "}
+                        {chainAssetDetails[selectedChain + " | " + selectedAsset].symbol}
+                      </div>
                     </div>
                   )}
                 </>
