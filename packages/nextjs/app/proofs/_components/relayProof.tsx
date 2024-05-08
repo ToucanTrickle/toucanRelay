@@ -65,13 +65,13 @@ export const RelayProof = () => {
           chainAssetDetails[selectedChain + " | " + selectedAsset].address,
         ]);
         console.log(assetDetails);
-        setCurrentSupply(parseInt(assetDetails[3].toString()) / parseInt(assetDetails[1].toString()));
+        setCurrentSupply(parseInt(assetDetails[3].toString()) / 10 ** assetDetails[1]);
       } else {
         const nativebalance = await publicClient.getBalance({
           address: contractData.address,
           blockTag: "latest",
         });
-        setCurrentSupply(parseFloat((nativebalance / 10n ** 18n).toString()));
+        setCurrentSupply(parseFloat((nativebalance / 10n ** 9n).toString()));
       }
     }
 
@@ -315,7 +315,9 @@ export const RelayProof = () => {
                       ))}
                       <div className="ml-5">
                         current supply = {currentSupply} in{" "}
-                        {chainAssetDetails[selectedChain + " | " + selectedAsset].symbol}
+                        {chainAssetDetails[selectedChain + " | " + selectedAsset].symbol == "ETH"
+                          ? "GWEI"
+                          : chainAssetDetails[selectedChain + " | " + selectedAsset].symbol}
                       </div>
                     </div>
                   )}
