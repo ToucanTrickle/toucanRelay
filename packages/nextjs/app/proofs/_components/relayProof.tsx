@@ -144,7 +144,7 @@ export const RelayProof = () => {
       setRelayProof(data.relayTxProof.proof);
       setRelayPublicInputs(JSON.stringify({ publicInputs: data.relayTxProof.publicInputs }));
 
-      const ipfsRes = await fetch("/api", {
+      const ipfsRes = await fetch(`${process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : ""}/api`, {
         method: "POST",
         body: JSON.stringify({
           userProof: data.userTxProof.proof,
