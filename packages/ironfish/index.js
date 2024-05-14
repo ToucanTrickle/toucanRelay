@@ -14,6 +14,7 @@ app.use(cors())
 const router = express();
 app.use(`${process.env.MOUNT_PATH}`, router)
 router.use(express.json())
+router.use(cors())
 
 const task = schedule('* * * * *', async () =>  {
   checkAndUpdateSupply()
