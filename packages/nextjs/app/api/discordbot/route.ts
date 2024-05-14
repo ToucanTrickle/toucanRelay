@@ -41,7 +41,7 @@ export async function POST(req: Request) {
     const cmcData = await cmcResp.json();
     const IronPriceUSD = parseInt((cmcData.data.IRON.quote.USD.price * 10 ** relayIronPriceDecimals).toString());
 
-    if (Math.abs(Number(relayIronPrice) - IronPriceUSD) > 5000) {
+    if (Math.abs(Number(relayIronPrice) - IronPriceUSD) > 100000000000000000n) {
       await contractData.write.updateIronPrice([BigInt(IronPriceUSD), relayIronPriceDecimals]);
     }
 
