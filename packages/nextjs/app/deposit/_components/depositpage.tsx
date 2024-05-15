@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Abi, createPublicClient, createWalletClient, custom, getContract, http } from "viem";
-import { WalletClient } from "wagmi";
+import { PublicClient, WalletClient } from "wagmi";
 import { InputBase } from "~~/components/scaffold-eth";
 import { chainAssetDetails, chainAssets, chainNames, chainRPCDetails } from "~~/constants/constants";
 import deployedContracts from "~~/contracts/deployedContracts";
@@ -13,6 +13,10 @@ export const DepositPage = () => {
   const [isTransactionErrored, setIsTransactionErrored] = useState(false);
   const [txHash, setTxHash] = useState("");
   const [walletClient, setWalletClient] = useState<any>();
+  // const [publicClient, setPublicClient] = useState<PublicClient>();
+  const [wIRONBalance, setWIRONBalance] = useState<bigint>(0n);
+  const [fetchingwIRON, setFetchingWIRON] = useState(false);
+  const [isFetchErrored, setIsFetchErrored] = useState(false);
 
   useEffect(() => {
     setWalletClient(
@@ -21,11 +25,12 @@ export const DepositPage = () => {
         transport: custom(window.ethereum as any),
       }),
     );
-  }, [selectedChain]);
+  }, [selectedChain, walletClient]);
 
   const depositAsset = useCallback(async () => {
     setDepositing(true);
     const [account] = await walletClient.getAddresses();
+
     const publicClient = createPublicClient({
       chain: chainRPCDetails[selectedChain],
       transport: http(),
@@ -144,6 +149,57 @@ export const DepositPage = () => {
     }
   }, [assetAmount, selectedAsset, selectedChain, walletClient]);
 
+  const wIRONSupply = useCallback(async () => {
+    setFetchingWIRON(true);
+
+    try {
+      const publicClient = createPublicClient({
+        chain: chainRPCDetails[selectedChain],
+        transport: http(),
+      });
+
+      const wIRONContract = getContract({
+        abi: [
+          {
+            inputs: [
+              {
+                internalType: "address",
+                name: "account",
+                type: "address",
+              },
+            ],
+            name: "balanceOf",
+            outputs: [
+              {
+                internalType: "uint256",
+                name: "",
+                type: "uint256",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+        ] as unknown as Abi,
+        address:
+          deployedContracts[[chainRPCDetails[selectedChain].id] as unknown as keyof typeof deployedContracts].WIRON
+            .address,
+        walletClient: walletClient as WalletClient,
+        publicClient: publicClient as PublicClient,
+      });
+
+      const wironBalance = await wIRONContract.read?.balanceOf([
+        deployedContracts[[chainRPCDetails[selectedChain].id] as unknown as keyof typeof deployedContracts].RelayVault
+          .address,
+      ]);
+      setWIRONBalance(wironBalance as bigint);
+      setFetchingWIRON(false);
+      setIsFetchErrored(false);
+    } catch (e) {
+      setFetchingWIRON(false);
+      setIsFetchErrored(true);
+    }
+  }, [selectedChain, walletClient]);
+
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
       <div className="container mx-auto flex flex-col">
@@ -203,6 +259,19 @@ export const DepositPage = () => {
                   )}
                 </>
               )}
+            </div>
+            <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
+              <p className="font-medium my-0 break-words">
+                Current WIRON supply in vault: {(wIRONBalance / 10n ** 18n)?.toString()}
+              </p>
+              <button className={`btn btn-secondary btn-sm font-light hover:border-transparent`} onClick={wIRONSupply}>
+                {fetchingwIRON && <span className="loading loading-spinner loading-xs"></span>}
+                {isFetchErrored ? "Unable to fetch wIRON supply" : "Fetch"}
+              </button>
+              <p className="font-small my-0 break-words">
+                Note: The deposit might fail if the supply of wIRON in vault is insufficient to compensate for the token
+                amount.
+              </p>
             </div>
             <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
               <p className="font-medium my-0 break-words">Enter Transfer Details</p>
