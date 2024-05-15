@@ -32,7 +32,7 @@ export async function POST(req: Request) {
     const cmcResp = await fetch(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=IRON`, {
       method: "GET",
       headers: {
-        "X-CMC_PRO_API_KEY": String(process.env.NEXT_PUBLIC_CMC_API_KEY),
+        "X-CMC_PRO_API_KEY": String(process.env.CMC_API_KEY),
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
         "Content-Type": "application/json",

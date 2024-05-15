@@ -93,17 +93,18 @@ export const RelayProof = () => {
       setGenerating(true);
 
       const cmcResp = await fetch(
-        `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=IRON,ETH,${
-          chainAssetDetails[selectedChain + " | " + selectedAsset].symbol
-        }`,
+        `${process.env.NEXT_PUBLIC_BASE_PATH ? process.env.NEXT_PUBLIC_BASE_PATH : ""}/proofs/api`,
         {
-          method: "GET",
+          method: "POST",
           headers: {
-            "X-CMC_PRO_API_KEY": String(process.env.NEXT_PUBLIC_CMC_API_KEY),
-            "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "*",
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            url: `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=IRON,ETH,${
+              chainAssetDetails[selectedChain + " | " + selectedAsset].symbol
+            }`,
+          }),
         },
       );
       const cmcData = await cmcResp.json();
