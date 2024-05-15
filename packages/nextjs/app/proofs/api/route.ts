@@ -11,7 +11,7 @@ export async function POST(req: Request) {
       },
     });
     const cmcData = await cmcResp.json();
-    return new Response(JSON.stringify({ data: cmcData }));
+    return new Response(JSON.stringify(cmcData));
   } catch (e) {
     return new Response("Server Error", { status: 500 });
   }
