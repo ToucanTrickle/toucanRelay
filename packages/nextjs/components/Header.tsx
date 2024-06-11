@@ -4,6 +4,7 @@ import React, { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { FaDiscord, FaGithub } from "react-icons/fa";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -20,17 +21,16 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
-    label: "Fund Relay Bot",
+    label: "Relay Transactions",
     href: "/fund",
   },
   {
-    label: "Generate Relay Proof",
-    href: "/proofs",
-  },
-
-  {
     label: "Deposit Assets",
     href: "/deposit",
+  },
+  {
+    label: "Docs",
+    href: "https://steadfast-sled-5ba.notion.site/ToucanRelay-Bot-Docs-f26c7736b85d4eaaa7aea5ceb67cf988",
   },
 ];
 
@@ -110,6 +110,13 @@ export const Header = () => {
         </ul>
       </div>
       <div className="navbar-end flex-grow mr-4">
+        <Link className="mx-1" href={"https://discord.gg/xQnrNTEM"}>
+          <FaDiscord />
+        </Link>
+        <Link className="mx-5" href={"https://github.com/ToucanTrickle/toucanRelay"}>
+          <FaGithub />
+        </Link>
+
         <RainbowKitCustomConnectButton />
         <FaucetButton />
       </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { DepositPage } from "./_components";
 import { NextPage } from "next";
 

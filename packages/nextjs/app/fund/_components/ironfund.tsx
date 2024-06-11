@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 // import { SerializedTx } from "./serializedTx";
 import { TxDetails } from "./txDetails";
 import { Identity } from "@semaphore-protocol/identity";
@@ -17,6 +18,8 @@ export const Ironfund = () => {
   // const [isFetching, setIsFetching] = useState(false);
   // const [serializationErrored, setSerializationErrored] = useState(false);
   const [spendLimit, setSpendLimit] = useState(0);
+  const [nullifier, setNullifier] = useState<string>();
+  const [trapdoor, setTrapdoor] = useState<string>();
 
   useEffect(() => {
     const identityString = localStorage.getItem("identity");
@@ -38,6 +41,8 @@ export const Ironfund = () => {
 
     if (identityString) {
       const identity = new Identity(String(identityString));
+      setNullifier(identity.nullifier.toString(16));
+      setTrapdoor(identity.trapdoor.toString(16));
       setCommitment(identity.commitment.toString(16));
       getSpendLimit(identity.commitment.toString(16));
     }
@@ -46,6 +51,8 @@ export const Ironfund = () => {
   const createIdentity = useCallback(async () => {
     const identity = new Identity();
 
+    setNullifier(identity.nullifier.toString(16));
+    setTrapdoor(identity.trapdoor.toString(16));
     setCommitment(identity.commitment.toString(16));
 
     localStorage.setItem("identity", identity.toString());
@@ -86,9 +93,53 @@ export const Ironfund = () => {
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
       <div className="container mx-auto flex flex-col">
-        <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Fund $IRON to relay bot</h2>
+        <div className="grid grid-cols-3 flex">
+          <div></div>
+          <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Fund $IRON to relay bot</h2>
+          <div className="flex justify-center">
+            <Link href="/proofs">Next Step {">"}</Link>
+          </div>
+        </div>
         <div className="px-6 lg:px-10 w-full">
           <div className=" bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4">
+            <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
+              <div className="flex justify-between gap-2 flex-wrap">
+                <div className="flex-grow w-4/5">
+                  <p className="font-medium my-0 break-words">Your Identity</p>
+                </div>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={async () => {
+                    createIdentity();
+                  }}
+                  // disabled={isFetching}
+                >
+                  {/* {isFetching && <span className="loading loading-spinner loading-xs"></span>} */}
+                  Generate New
+                </button>
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <div className="flex items-center ml-2">
+                  <span className="text-xs font-medium mr-2 leading-none">nullifier</span>
+                  <span className="block text-xs font-extralight leading-none">string</span>
+                </div>
+                <InputBase name="nullifier" placeholder="nullifier" value={nullifier} onChange={setNullifier} />
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <div className="flex items-center ml-2">
+                  <span className="text-xs font-medium mr-2 leading-none">trapdoor</span>
+                  <span className="block text-xs font-extralight leading-none">string</span>
+                </div>
+                <InputBase name="trapdoor" placeholder="trapdoor" value={trapdoor} onChange={setTrapdoor} />
+              </div>
+              <div className="flex flex-col gap-1.5 w-full">
+                <div className="flex items-center ml-2">
+                  <span className="text-xs font-medium mr-2 leading-none">commitment</span>
+                  <span className="block text-xs font-extralight leading-none">string</span>
+                </div>
+                <InputBase name="commitment" placeholder="commitment" value={commitment} onChange={setCommitment} />
+              </div>
+            </div>
             <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
               <div className="flex">
                 <span className="font-bold">ToucanRelay deposit address:</span>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { NextPage } from "next";
-import { ArrowsRightLeftIcon, ChatBubbleBottomCenterTextIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { ArrowsRightLeftIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Home: NextPage = () => {
   return (
@@ -34,14 +34,14 @@ const Home: NextPage = () => {
               {/* <BugAntIcon className="h-8 w-8 fill-secondary" /> */}
               <EyeSlashIcon className="h-8 w-8 fill-secondary" />
               <p>
-                Anonymously fund ToucanRelay with{" "}
+                Anonymously relay transactions with{" "}
                 <Link href="/fund" passHref className="link">
-                  Fund Relay Bot
+                  Relay Transactions
                 </Link>{" "}
                 tab.
               </p>
             </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
+            {/* <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
               <ChatBubbleBottomCenterTextIcon className="h-8 w-8 fill-secondary" />
               <p>
                 Generate Relay Message with{" "}
@@ -50,7 +50,7 @@ const Home: NextPage = () => {
                 </Link>{" "}
                 tab.
               </p>
-            </div>
+            </div> */}
             <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
               <ArrowsRightLeftIcon className="h-8 w-8 fill-secondary" />
               <p>

@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useState } from "react";
 import { Abi, createPublicClient, createWalletClient, custom, getContract, http } from "viem";
 import { PublicClient, WalletClient } from "wagmi";

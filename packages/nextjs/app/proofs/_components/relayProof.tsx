@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { transactionProofs } from "../proofGenerator/ironfish";
 import { ProofData } from "./proofData";
 import { Identity } from "@semaphore-protocol/identity";
@@ -78,15 +79,15 @@ export const RelayProof = () => {
     getSupply();
   }, [contractData.address, contractData.read, publicClient, selectedAsset, selectedChain]);
 
-  const createIdentity = useCallback(async () => {
-    const identity = new Identity();
+  // const createIdentity = useCallback(async () => {
+  //   const identity = new Identity();
 
-    setNullifier(identity.nullifier.toString(16));
-    setTrapdoor(identity.trapdoor.toString(16));
-    setCommitment(identity.commitment.toString(16));
+  //   setNullifier(identity.nullifier.toString(16));
+  //   setTrapdoor(identity.trapdoor.toString(16));
+  //   setCommitment(identity.commitment.toString(16));
 
-    localStorage.setItem("identity", identity.toString());
-  }, []);
+  //   localStorage.setItem("identity", identity.toString());
+  // }, []);
 
   const generateProof = useCallback(async () => {
     try {
@@ -203,24 +204,20 @@ export const RelayProof = () => {
   return (
     <div className="flex flex-col gap-y-6 lg:gap-y-8 py-8 lg:py-12 justify-center items-center">
       <div className="container mx-auto flex flex-col">
-        <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Generate Relay Proof</h2>
+        <div className="grid grid-cols-3 flex">
+          <div className="flex justify-center">
+            <Link href="/fund">{"<"} Prev Step </Link>
+          </div>
+          <h2 className="text-3xl font-bold mb-4 text-center text-primary-content">Generate Relay Proof</h2>
+          <div></div>
+        </div>
         <div className="px-6 lg:px-10 w-full">
           <div className=" bg-base-100 border-base-300 border shadow-md shadow-secondary rounded-3xl px-6 lg:px-8 mb-6 space-y-1 py-4">
             <div className="flex flex-col gap-3 py-5 first:pt-0 last:pb-1">
               <div className="flex justify-between gap-2 flex-wrap">
                 <div className="flex-grow w-4/5">
-                  <p className="font-medium my-0 break-words">Enter Your Identity</p>
+                  <p className="font-medium my-0 break-words">Your Identity</p>
                 </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={async () => {
-                    createIdentity();
-                  }}
-                  // disabled={isFetching}
-                >
-                  {/* {isFetching && <span className="loading loading-spinner loading-xs"></span>} */}
-                  Generate New
-                </button>
               </div>
               <div className="flex flex-col gap-1.5 w-full">
                 <div className="flex items-center ml-2">
@@ -348,7 +345,15 @@ export const RelayProof = () => {
                 <InputBase name="assetAmount" placeholder="assetAmount" value={assetAmount} onChange={setAssetAmount} />
               </div>
             </div>
-            <div className="flex justify-center gap-2 flex-wrap">
+            <div className="flex flex-col justify-center gap-2 py-5 flex-wrap">
+              <p className="font-medium my-0 break-words">
+                Generate Proof and join discord server to use ToucanRelay discord bot
+              </p>
+              <div className="flex">
+                <Link className="btn btn-secondary my-3" href={"https://discord.gg/xQnrNTEM"}>
+                  Join Discord
+                </Link>
+              </div>
               <button
                 className="btn btn-primary"
                 onClick={async () => {
