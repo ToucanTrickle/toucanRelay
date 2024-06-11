@@ -27,7 +27,7 @@ export const DepositPage = () => {
         transport: custom(window.ethereum as any),
       }),
     );
-  }, [selectedChain, walletClient]);
+  }, []);
 
   const depositAsset = useCallback(async () => {
     setDepositing(true);
