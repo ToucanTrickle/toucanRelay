@@ -32,6 +32,10 @@ export const menuLinks: HeaderMenuLink[] = [
     label: "Docs",
     href: "https://steadfast-sled-5ba.notion.site/ToucanRelay-Bot-Docs-f26c7736b85d4eaaa7aea5ceb67cf988",
   },
+  {
+    label: "Bug Bounty",
+    href: "/bounty",
+  },
 ];
 
 export const HeaderMenuLinks = () => {
